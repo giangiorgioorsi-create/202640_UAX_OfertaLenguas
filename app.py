@@ -69,5 +69,5 @@ except Exception as e:
     st.error(f"Errore nel caricamento del file: {e}")
     st.info("Assicurati che il file 'Oferta_lenguas_202640.xlsx' sia nella stessa cartella dello script.")
 
-pandas
+
 openpyxl
