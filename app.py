@@ -27,6 +27,47 @@ def cargar_datos():
 
 try:
     df = cargar_datos()
+    st.title("🏛️ Portal de Oferta Académica — Centro de Lenguas")
+
+    # Creamos dos pestañas: una para explorar y otra para buscar
+    tab_explorar, tab_buscar = st.tabs(["📊 Explorar la Oferta", "🔍 Buscador de Cursos"])
+
+    with tab_explorar:
+        st.header("Radiografía de Idiomas 2026")
+        
+        # Métricas rápidas (High-level metrics)
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Idiomas Disponibles", df['Lengua'].nunique())
+        c2.metric("Total de Grupos (NRC)", df['NRC'].count())
+        c3.metric("Modalidades", df['MetodoInstruccion'].nunique())
+
+        st.divider()
+
+        # Gráficos de exploración
+        col_graf1, col_graf2 = st.columns(2)
+        
+        with col_graf1:
+            st.write("**Distribución por Idioma**")
+            # Conteo de grupos por lengua
+            conteo_lenguas = df['Lengua'].value_counts()
+            st.bar_chart(conteo_lenguas)
+
+        with col_graf2:
+            st.write("**Modalidades de Instrucción**")
+            conteo_metodo = df['MetodoInstruccion'].value_counts()
+            st.pie_chart(conteo_metodo)
+
+        st.info("""
+        **Tip Académico:** Recuerda que los niveles siguen el Marco Común Europeo (A1-C1). 
+        Explora la diversidad de horarios para planear mejor tu semestre.
+        """)
+
+    with tab_buscar:
+        # Aquí va todo tu código anterior de filtros (selectbox, etc.)
+        # ... (copia aquí la lógica de sel_idioma, sel_asignatura, etc.)
+
+try:
+    df = cargar_datos()
     st.title("🏛️ Buscador de Oferta Académica — Centro de Lenguas")
     st.markdown("""
     Siga el orden de los filtros en la barra lateral para consultar la disponibilidad de cursos, 
