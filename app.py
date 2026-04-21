@@ -11,7 +11,7 @@ st.write("Seleziona i criteri per visualizzare i dettagli del corso.")
 @st.cache_data
 def load_data():
     # Sostituisci con il percorso reale del tuo file
-    df = pd.read_excel("Oferta_lenguas_202640.xlsx")
+    df = pd.read_excel("202640_UAX_OfertaLenguas")
     return df
 
 try:
