@@ -10,61 +10,62 @@ st.write("Seleziona i criteri per visualizzare i dettagli del corso.")
 # 1. Caricamento Dati
 @st.cache_data
 def load_data():
-    # Sostituisci con il percorso reale del tuo file
-    df = pd.read_excel("202640_UAX_OfertaLenguas")
+    # NOTA: Assicurati che il nome file su GitHub sia esattamente questo (inclusa estensione)
+    file_name = "202640_UAX_OfertaLenguas.xlsx"
+    df = pd.read_excel(file_name)
+    # Pulizia nomi colonne per sicurezza
+    df.columns = [c.strip() for c in df.columns]
     return df
 
 try:
     df = load_data()
 
-    # --- SIDEBAR PER FILTRI A CASCATA ---
+    # --- SIDEBAR PER FILTRI ---
     st.sidebar.header("Filtri di Ricerca")
 
     # Filtro 1: Lingua
-    lingue = sorted(df['Lengua'].unique())
+    lingue = sorted(df['Lengua'].unique().tolist())
     selected_lengua = st.sidebar.selectbox("1. Scegli Lingua", [""] + lingue)
 
     if selected_lengua:
-        # Filtro 2: Materia (filtrata per lingua)
-        materie = sorted(df[df['Lengua'] == selected_lengua]['NombreMateria'].unique())
+        # Filtro 2: Materia
+        df_l = df[df['Lengua'] == selected_lengua]
+        materie = sorted(df_l['NombreMateria'].unique().tolist())
         selected_materia = st.sidebar.selectbox("2. Scegli Materia", [""] + materie)
         
         if selected_materia:
-            # Filtro 3: Orario (filtrato per lingua e materia)
-            orari = sorted(df[(df['Lengua'] == selected_lengua) & 
-                              (df['NombreMateria'] == selected_materia)]['HoraInicio'].unique())
-            selected_horario = st.sidebar.selectbox("3. Scegli Orario", [""] + [str(h) for h in orari])
+            # Filtro 3: Orario
+            df_m = df_l[df_l['NombreMateria'] == selected_materia]
+            orari = sorted(df_m['HoraInicio'].astype(str).unique().tolist())
+            selected_horario = st.sidebar.selectbox("3. Scegli Orario", [""] + orari)
 
             # --- VISUALIZZAZIONE RISULTATI ---
             if selected_horario:
-                # Filtro finale del dataframe
-                risultato = df[(df['Lengua'] == selected_lengua) & 
-                               (df['NombreMateria'] == selected_materia) & 
-                               (df['HoraInicio'].astype(str) == selected_horario)]
+                risultato = df_m[df_m['HoraInicio'].astype(str) == selected_horario]
 
                 st.subheader(f"Risultati per {selected_materia}")
                 
                 # Tabella principale
                 st.dataframe(risultato[['NRC', 'Docente', 'HoraInicio', 'HoraFin', 'Status']], use_container_width=True)
 
-                # Dettagli del corso selezionato (se ce n'è più di uno, permette di scegliere l'NRC)
-                if len(risultato) > 0:
-                    st.divider()
-                    st.subheader("📋 Dettagli Completi")
-                    for _, row in risultato.iterrows():
-                        with st.expander(f"Dettagli NRC: {row['NRC']}"):
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                st.write(f"**Docente:** {row['Docente']}")
-                                st.write(f"**Metodo:** {row['MétodoInstruccion']}")
-                            with col2:
-                                st.write(f"**Periodo:** {row['Parte del periodo']}")
-                                st.write(f"**Note:** {row['Notas'] if pd.notna(row['Notas']) else 'Nessuna nota'}")
+                # Dettagli del corso selezionato
+                st.divider()
+                st.subheader("📋 Dettagli Completi")
+                for _, row in risultato.iterrows():
+                    with st.expander(f"Dettagli NRC: {row['NRC']}"):
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write(f"**Docente:** {row['Docente']}")
+                            # CORREZIONE: 'MetodoInstruccion' senza accento
+                            st.write(f"**Metodo:** {row['MetodoInstruccion']}")
+                        with col2:
+                            # CORREZIONE: 'PartePeriodo' invece di 'Parte del periodo'
+                            st.write(f"**Periodo:** {row['PartePeriodo']}")
+                            st.write(f"**Note:** {row['Notas'] if pd.notna(row['Notas']) else 'Nessuna nota'}")
 
-    # Bottone Reset (Streamlit ricarica l'app)
     if st.sidebar.button("Reset Filtri"):
         st.rerun()
 
 except Exception as e:
-    st.error(f"Errore nel caricamento del file: {e}")
-    st.info("Assicurati che il file 'Oferta_lenguas_202640.xlsx' sia nella stessa cartella dello script.")
+    st.error(f"Errore tecnico: {e}")
+    st.info("Controlla che il nome del file su GitHub corrisponda a quello nel codice.")
