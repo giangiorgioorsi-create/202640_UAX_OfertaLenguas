@@ -4,13 +4,16 @@ import pandas as pd
 # 1. Configuración Institucional
 st.set_page_config(page_title="Portal de Oferta Académica 2026", layout="wide")
 
-# Estilos CSS (Estética Anáhuac)
+# Estilos CSS (Estética Anáhuac y organización visual)
 st.markdown("""
     <style>
     .card { border: 1px solid #e0e0e0; padding: 25px; border-radius: 12px; background-color: #ffffff; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .nrc-box { background-color: #ff6600; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold; display: inline-block; margin: 5px 0; }
     .banner-text { color: #444; font-size: 0.9em; font-weight: 700; display: block; }
-    .legend-box { background-color: #f0f2f6; padding: 12px; border-radius: 8px; font-size: 0.85em; color: #444; border-left: 5px solid #ff6600; }
+    .legend-box { 
+        background-color: #f0f2f6; padding: 12px; border-radius: 8px; 
+        font-size: 0.85em; color: #444; border-left: 5px solid #ff6600; 
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -50,44 +53,35 @@ try:
     with tab_buscar:
         st.sidebar.header("Filtros de Inscripción")
         
-        # Filtro 1: Idioma
+        # Filtros en cascada (5 niveles)
         sel_idioma = st.sidebar.selectbox("1. Idioma", [""] + sorted(df_full['Lengua'].unique().tolist()), key=f"id_{st.session_state.idioma_key}")
         
         if sel_idioma:
             df_f = df_full[df_full['Lengua'] == sel_idioma]
-            
-            # Filtro 2: Asignatura
             sel_materia = st.sidebar.selectbox("2. Asignatura", [""] + sorted(df_f['NombreMateria'].unique().tolist()), key=f"mat_{st.session_state.asignatura_key}")
             
             if sel_materia:
                 df_f = df_f[df_f['NombreMateria'] == sel_materia]
-                
-                # Filtro 3: Modalidad
                 sel_metodo = st.sidebar.selectbox("3. Modalidad", [""] + sorted(df_f['MetodoInstruccion'].unique().tolist()), key=f"met_{st.session_state.metodo_key}")
                 
                 if sel_metodo:
                     df_f = df_f[df_f['MetodoInstruccion'] == sel_metodo]
-                    
-                    # Filtro 4: Fechas
                     sel_fecha = st.sidebar.selectbox("4. Periodo / Fechas", [""] + sorted(df_f['Fechas'].unique().tolist()), key=f"fec_{st.session_state.fechas_key}")
                     
                     if sel_fecha:
                         df_f = df_f[df_f['Fechas'] == sel_fecha]
-                        
-                        # Filtro 5: Horario
                         sel_horario = st.sidebar.selectbox("5. Horario", [""] + sorted(df_f['Hora_Ref'].unique().tolist()), key=f"hr_{st.session_state.horario_key}")
                         
                         if sel_horario:
                             target_cursos = df_f[df_f['Hora_Ref'] == sel_horario]
                             st.success(f"Resultados encontrados")
                             
-                            # Eliminamos duplicados visuales por ListaCruzada
-                            # Si ListaCruzada es NaN, se usa el NRC para no colapsar grupos independientes
+                            # Clave de agrupación interna para visualización
                             target_cursos['GroupKey'] = target_cursos['ListaCruzada'].fillna(target_cursos['NRC'].astype(str))
                             
                             for _, row in target_cursos.drop_duplicates(subset=['GroupKey']).iterrows():
                                 
-                                # LÓGICA DE VINCULACIÓN POR ListaCruzada
+                                # Vinculación basada estrictamente en ListaCruzada
                                 if pd.notna(row['ListaCruzada']):
                                     lista_cruzada = df_full[df_full['ListaCruzada'] == row['ListaCruzada']]
                                     es_lista_cruzada = True
@@ -121,13 +115,22 @@ try:
                                     with c_a:
                                         st.write(f"**Créditos:** {row['CreditosAcademicos']}")
                                         st.write(f"**Fechas:** {row['Fechas']}")
-                                    with c_b:
                                         st.write(f"**Estatus:** {row['Status']}")
+                                    with c_b:
                                         dias_raw = str(row['Weekdays']) if pd.notna(row['Weekdays']) else "No especificado"
-                                        st.write(f"**Días:** `{dias_raw}`")
+                                        st.write(f"**Días de sesión:** `{dias_raw}`")
+                                        
+                                        # Restauración de la leyenda explicativa detallada
+                                        st.markdown("""
+                                        <div class='legend-box'>
+                                        <strong>Guía de nomenclatura de días:</strong><br>
+                                        1: Lunes | 2: Martes | 3: Miércoles | 4: Jueves<br>
+                                        5: Viernes | 6: Sábado | 7: Domingo
+                                        </div>
+                                        """, unsafe_allow_html=True)
                                     
-                                    st.markdown("<div class='legend-box'>1: Lun | 2: Mar | 3: Mié | 4: Jue | 5: Vie | 6: Sáb | 7: Dom</div>", unsafe_allow_html=True)
-                                    st.info(f"**Notas:** {row['Notas'] if pd.notna(row['Notas']) else 'Sin observaciones.'}")
+                                    st.divider()
+                                    st.info(f"**Notas:** {row['Notas'] if pd.notna(row['Notas']) else 'Sin observaciones adicionales.'}")
 
         st.sidebar.divider()
         if st.sidebar.button("🔄 Restablecer Filtros", on_click=restablecer_filtros):
