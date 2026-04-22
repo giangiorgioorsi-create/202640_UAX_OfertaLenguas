@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # 1. Configuración Institucional
-st.set_page_config(page_title="Portal de Oferta Académica 2026", layout="wide")
+st.set_page_config(page_title="Portal de oferta académica Verano 2026", layout="wide")
 
 # CSS para un diseño limpio y profesional
 st.markdown("""
@@ -12,7 +12,7 @@ st.markdown("""
         background-color: #ffffff; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
     }
     .nrc-box { 
-        background-color: #ff6600; color: white; padding: 6px 12px; 
+        background-color: #ff5900; color: white; padding: 6px 12px; 
         border-radius: 6px; font-weight: bold; display: inline-block; margin: 5px 0;
     }
     .banner-text { color: #444; font-size: 0.9em; font-weight: 700; display: block; }
@@ -32,9 +32,9 @@ def cargar_datos():
 
 try:
     df_full = cargar_datos()
-    st.markdown("<h1 style='color: #ff6600;'>🏛️ Portal de Consulta Académica</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #ff6600;'>🏛️ Auxiliar de busqueda de materias</h1>", unsafe_allow_html=True)
 
-    tab_explorar, tab_buscar = st.tabs(["📊 Panorama General", "🔍 Buscador de Asignaturas"])
+    tab_explorar, tab_buscar = st.tabs(["📊 Panorama general", "🔍 Buscador de asignaturas"])
 
     with tab_explorar:
         # (Se mantiene igual que la versión anterior para estadísticas)
@@ -44,7 +44,7 @@ try:
         c3.metric("Docentes", df_full['Docente'].nunique())
         st.divider()
         col_graf1, col_graf2 = st.columns(2)
-        with col_graf1: st.bar_chart(df_full['Lengua'].value_counts(), color="#ff6600")
+        with col_graf1: st.bar_chart(df_full['Lengua'].value_counts(), color="#ff5900")
         with col_graf2: st.bar_chart(df_full['MetodoInstruccion'].value_counts(), color="#ffb380")
 
     with tab_buscar:
