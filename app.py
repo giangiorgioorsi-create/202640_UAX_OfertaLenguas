@@ -34,6 +34,7 @@ try:
     tab_explorar, tab_buscar = st.tabs(["📊 Explorar la Oferta", "🔍 Buscador de Cursos"])
 
     with tab_explorar:
+with tab_explorar:
         st.header("Análisis General de la Oferta 2026")
         
         # Métricas de alto nivel
@@ -46,11 +47,21 @@ try:
 
         col_a, col_b = st.columns(2)
         with col_a:
-            st.write("**Grupos por Idioma**")
-            st.bar_chart(df['Lengua'].value_counts())
+            st.write("**Distribución por Idioma**")
+            # Conteo simple por lengua
+            conteo_lengua = df['Lengua'].value_counts()
+            st.bar_chart(conteo_lengua)
+            
         with col_b:
-            st.write("**Distribución de Modalidades**")
-            st.pie_chart(df['MetodoInstruccion'].value_counts())
+            st.write("**Distribución por Modalidad**")
+            # Reemplazamos pie_chart por bar_chart para máxima compatibilidad
+            conteo_metodo = df['MetodoInstruccion'].value_counts()
+            st.bar_chart(conteo_metodo)
+
+        st.info("""
+        **Nota Académica:** Esta vista panorámica permite identificar la carga docente y la diversidad 
+        de modalidades disponibles para el ciclo 2026.
+        """)
 
     with tab_buscar:
         # TODA la lógica de búsqueda debe estar indentada aquí adentro
