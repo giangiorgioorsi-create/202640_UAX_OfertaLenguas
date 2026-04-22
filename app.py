@@ -4,7 +4,7 @@ import pandas as pd
 # 1. Configuración Institucional
 st.set_page_config(page_title="Portal de Oferta Académica 2026", layout="wide")
 
-# Estilos CSS institucionales (Estética Anáhuac)
+# Estilos CSS institucionales
 st.markdown("""
     <style>
     .card { 
@@ -23,15 +23,20 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-if 'reset_key' not in st.session_state: st.session_state.reset_key = 0
-def restablecer(): st.session_state.reset_key += 1
+# 2. Gestión de Estado para el Restablecimiento (Reset) con nuevos filtros
+filtros = ['idioma', 'asignatura', 'metodo', 'fechas', 'horario']
+for f in filtros:
+    if f"{f}_key" not in st.session_state:
+        st.session_state[f"{f}_key"] = 0
+
+def restablecer_filtros():
+    for f in filtros:
+        st.session_state[f"{f}_key"] += 1
 
 @st.cache_data
 def cargar_datos():
     archivo = "202640_UAX_OfertaLenguas.xlsx"
-    # Cargamos Weekdays como string para preservar el formato de comas
     df = pd.read_excel(archivo, dtype={'Weekdays': str})
-    # Limpieza de nombres de columnas (espacios en blanco)
     df.columns = [c.strip() for c in df.columns]
     df['Hora_Ref'] = df['HoraInicio'].astype(str)
     return df
@@ -43,7 +48,6 @@ try:
     tab_explorar, tab_buscar = st.tabs(["📊 Panorama General", "🔍 Buscador de Asignaturas"])
 
     with tab_explorar:
-        # Métricas de la Coordinación
         c1, c2, c3 = st.columns(3)
         c1.metric("Idiomas", df_full['Lengua'].nunique())
         c2.metric("Grupos Totales", df_full['NRC'].count())
@@ -55,81 +59,97 @@ try:
 
     with tab_buscar:
         st.sidebar.header("Filtros de Inscripción")
+        
+        # Filtro 1: Idioma
         idiomas = sorted(df_full['Lengua'].unique().tolist())
-        sel_idioma = st.sidebar.selectbox("1. Idioma", [""] + idiomas, key=f"id_{st.session_state.reset_key}")
+        sel_idioma = st.sidebar.selectbox("1. Idioma", [""] + idiomas, key=f"id_{st.session_state.idioma_key}")
         
         if sel_idioma:
-            df_i = df_full[df_full['Lengua'] == sel_idioma]
-            materias = sorted(df_i['NombreMateria'].unique().tolist())
-            sel_materia = st.sidebar.selectbox("2. Asignatura", [""] + materias, key=f"mat_{st.session_state.reset_key}")
+            df_filtrado = df_full[df_full['Lengua'] == sel_idioma]
+            
+            # Filtro 2: Asignatura
+            materias = sorted(df_filtrado['NombreMateria'].unique().tolist())
+            sel_materia = st.sidebar.selectbox("2. Asignatura", [""] + materias, key=f"mat_{st.session_state.asignatura_key}")
             
             if sel_materia:
-                df_m = df_i[df_i['NombreMateria'] == sel_materia]
-                horarios = sorted(df_m['Hora_Ref'].unique().tolist())
-                sel_horario = st.sidebar.selectbox("3. Horario", [""] + horarios, key=f"hr_{st.session_state.reset_key}")
+                df_filtrado = df_filtrado[df_filtrado['NombreMateria'] == sel_materia]
                 
-                if sel_horario:
-                    target_cursos = df_m[df_m['Hora_Ref'] == sel_horario]
-                    st.success(f"Resultados para: **{sel_materia}**")
+                # Filtro 3: Método Instruccional
+                metodos = sorted(df_filtrado['MetodoInstruccion'].unique().tolist())
+                sel_metodo = st.sidebar.selectbox("3. Modalidad", [""] + metodos, key=f"met_{st.session_state.metodo_key}")
+                
+                if sel_metodo:
+                    df_filtrado = df_filtrado[df_filtrado['MetodoInstruccion'] == sel_metodo]
                     
-                    for _, row in target_cursos.iterrows():
-                        # Lógica de Lista Cruzada (Docente, Hora y Fechas)
-                        lista_cruzada = df_full[
-                            (df_full['Docente'] == row['Docente']) & 
-                            (df_full['Hora_Ref'] == row['Hora_Ref']) & 
-                            (df_full['Fechas'] == row['Fechas'])
-                        ]
+                    # Filtro 4: Fechas
+                    periodos = sorted(df_filtrado['Fechas'].unique().tolist())
+                    sel_fecha = st.sidebar.selectbox("4. Periodo / Fechas", [""] + periodos, key=f"fec_{st.session_state.fechas_key}")
+                    
+                    if sel_fecha:
+                        df_filtrado = df_filtrado[df_filtrado['Fechas'] == sel_fecha]
                         
-                        es_lista_cruzada = len(lista_cruzada) > 1
-
-                        # Tarjeta del Curso
-                        st.markdown(f"""
-                        <div class="card">
-                            <h3 style="color: #ff6600; margin-bottom: 5px;">{sel_materia}</h3>
-                            <p style="margin: 0;"><strong>Catedrático:</strong> {row['Docente']}</p>
-                            <p style="margin: 0;"><strong>Horario:</strong> {row['HoraInicio']} - {row['HoraFin']} | <strong>Modalidad:</strong> {row['MetodoInstruccion']}</p>
-                            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
-                            <p style="font-weight: bold; margin-bottom: 10px;">
-                                {"Grupos vinculados en esta sesión (Lista Cruzada):" if es_lista_cruzada else "Información de inscripción:"}
-                            </p>
-                        """, unsafe_allow_html=True)
+                        # Filtro 5: Horario
+                        horarios = sorted(df_filtrado['Hora_Ref'].unique().tolist())
+                        sel_horario = st.sidebar.selectbox("5. Horario", [""] + horarios, key=f"hr_{st.session_state.horario_key}")
                         
-                        cols = st.columns(len(lista_cruzada) if len(lista_cruzada) < 5 else 4)
-                        for i, (_, item) in enumerate(lista_cruzada.iterrows()):
-                            with cols[i % 4]:
-                                st.markdown(f"<div class='nrc-box'>NRC {item['NRC']}</div>", unsafe_allow_html=True)
-                                st.markdown(f"<span class='banner-text'>{item['ClaveBanner']}</span>", unsafe_allow_html=True)
-                                if es_lista_cruzada:
-                                    st.caption(item['NombreMateria'])
-                        
-                        st.markdown("</div>", unsafe_allow_html=True)
-                        
-                        with st.expander("📚 Detalles Académicos y Programación"):
-                            col_d1, col_d2 = st.columns(2)
-                            with col_d1:
-                                # Actualizado: CreditosAcademicos
-                                st.write(f"**Créditos:** {row['CreditosAcademicos']}")
-                                st.write(f"**Estatus:** {row['Status']}")
-                                st.write(f"**Fechas del periodo:** {row['Fechas']}")
+                        if sel_horario:
+                            target_cursos = df_filtrado[df_filtrado['Hora_Ref'] == sel_horario]
+                            st.success(f"Resultados para: **{sel_materia}**")
                             
-                            with col_d2:
-                                st.write(f"**Clave Banner:** {row['ClaveBanner']}")
-                                dias_raw = str(row['Weekdays']) if pd.notna(row['Weekdays']) else "No especificado"
-                                st.write(f"**Días de sesión (1-7):** `{dias_raw}`")
+                            for _, row in target_cursos.iterrows():
+                                # Lógica de Lista Cruzada
+                                lista_cruzada = df_full[
+                                    (df_full['Docente'] == row['Docente']) & 
+                                    (df_full['Hora_Ref'] == row['Hora_Ref']) & 
+                                    (df_full['Fechas'] == row['Fechas'])
+                                ]
                                 
-                                st.markdown("""
-                                <div class='legend-box'>
-                                <strong>Nomenclatura de días:</strong><br>
-                                1: Lunes | 2: Martes | 3: Miércoles | 4: Jueves<br>
-                                5: Viernes | 6: Sábado | 7: Domingo
-                                </div>
+                                es_lista_cruzada = len(lista_cruzada) > 1
+
+                                st.markdown(f"""
+                                <div class="card">
+                                    <h3 style="color: #ff6600; margin-bottom: 5px;">{sel_materia}</h3>
+                                    <p style="margin: 0;"><strong>Catedrático:</strong> {row['Docente']}</p>
+                                    <p style="margin: 0;"><strong>Horario:</strong> {row['HoraInicio']} - {row['HoraFin']}</p>
+                                    <p style="margin: 0;"><strong>Modalidad:</strong> {row['MetodoInstruccion']} | <strong>Fechas:</strong> {row['Fechas']}</p>
+                                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+                                    <p style="font-weight: bold; margin-bottom: 10px;">
+                                        {"Grupos vinculados en esta sesión (Lista Cruzada):" if es_lista_cruzada else "Información de inscripción:"}
+                                    </p>
                                 """, unsafe_allow_html=True)
                                 
-                            st.divider()
-                            st.info(f"**Notas:** {row['Notas'] if pd.notna(row['Notas']) else 'Sin observaciones.'}")
+                                cols = st.columns(len(lista_cruzada) if len(lista_cruzada) < 5 else 4)
+                                for i, (_, item) in enumerate(lista_cruzada.iterrows()):
+                                    with cols[i % 4]:
+                                        st.markdown(f"<div class='nrc-box'>NRC {item['NRC']}</div>", unsafe_allow_html=True)
+                                        st.markdown(f"<span class='banner-text'>{item['ClaveBanner']}</span>", unsafe_allow_html=True)
+                                        if es_lista_cruzada:
+                                            st.caption(item['NombreMateria'])
+                                
+                                st.markdown("</div>", unsafe_allow_html=True)
+                                
+                                with st.expander("📚 Detalles Académicos Completos"):
+                                    col_d1, col_d2 = st.columns(2)
+                                    with col_d1:
+                                        st.write(f"**Créditos:** {row['CreditosAcademicos']}")
+                                        st.write(f"**Estatus:** {row['Status']}")
+                                        st.write(f"**ID Banner:** {row['ClaveBanner']}")
+                                    
+                                    with col_d2:
+                                        dias_raw = str(row['Weekdays']) if pd.notna(row['Weekdays']) else "No especificado"
+                                        st.write(f"**Días de sesión (1-7):** `{dias_raw}`")
+                                        st.markdown("""
+                                        <div class='legend-box'>
+                                        1: Lun | 2: Mar | 3: Mié | 4: Jue | 5: Vie | 6: Sáb | 7: Dom
+                                        </div>
+                                        """, unsafe_allow_html=True)
+                                        
+                                    st.divider()
+                                    st.info(f"**Notas:** {row['Notas'] if pd.notna(row['Notas']) else 'Sin observaciones.'}")
 
         st.sidebar.divider()
-        if st.sidebar.button("🔄 Restablecer Filtros", on_click=restablecer): st.rerun()
+        if st.sidebar.button("🔄 Restablecer Filtros", on_click=restablecer_filtros):
+            st.rerun()
 
 except Exception as e:
     st.error(f"⚠️ Error en la plataforma: {e}")
