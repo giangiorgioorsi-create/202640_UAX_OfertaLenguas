@@ -122,23 +122,23 @@ def cargar_datos():
 
 try:
     df = cargar_datos()
-    st.markdown("<h1 style='color: #FF6600 !important;'>🏛️ Centro de Lenguas — Oferta Académica</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #FF6600 !important;'>🏛️ Centro de Lenguas UAX — Oferta Académica 202640</h1>", unsafe_allow_html=True)
 
     t1, t2 = st.tabs(["🏠 Inicio y Guía", "🔍 Buscador de Cursos"])
 
     with t1:
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Idiomas", df['Lengua'].nunique())
-        c2.metric("Total Grupos", df['NRC'].count())
-        c3.metric("Modalidades", df['MetodoInstruccion'].nunique())
-
-        st.divider()
         cola, colb = st.columns([2, 1])
         with cola:
-            st.markdown("### 📝 Guía de Inscripción")
-            st.write("1. Localiza tu curso usando el buscador por NRC o los filtros.")
-            st.write("2. Verifica que el horario y periodo sean los correctos.")
-            with st.expander("✨ Mensaje de la Coordinación"):
+            st.markdown("### 📋 Guía rápida de planificación")
+            st.markdown("""
+1. **Abre la barra lateral:** haz clic en el botón en la parte superior izquierda, te aparecerá una barra lateral.
+2. **Filtra con cuidado:** selecciona entre las opciones propuestas.
+3. **Conoce los detalles:** ve a la pestaña 'Buscador de Cursos'.
+4. **Verifica los datos:** toma nota del NRC y de la Clave Banner.
+5. **Listas Cruzadas:** si tu curso tiene varios NRC, elige el que corresponde a tu plan de estudios.
+6. **Planifica en Banner:** agrega el curso a tu planificación a través del SIU.
+            """)
+            with st.expander("✨ Un mensaje para tu camino"):
                 st.info("*'Un idioma diferente es una visión diferente de la vida.'* — Federico Fellini")
 
         with colb:
