@@ -12,6 +12,7 @@ if 'asignatura_key' not in st.session_state:
 if 'horario_key' not in st.session_state:
     st.session_state.horario_key = 0
 
+# Definición de la función (Asegúrate que termine en 'os')
 def restablecer_filtros():
     st.session_state.idioma_key += 1
     st.session_state.asignatura_key += 1
@@ -30,13 +31,10 @@ try:
     df = cargar_datos()
     st.title("🏛️ Portal de Oferta Académica — Centro de Lenguas")
 
-    # Definición de pestañas
     tab_explorar, tab_buscar = st.tabs(["📊 Explorar la Oferta", "🔍 Buscador de Cursos"])
 
     with tab_explorar:
         st.header("Análisis General de la Oferta 2026")
-        
-        # Métricas de alto nivel (Indentadas con 8 espacios)
         m1, m2, m3 = st.columns(3)
         m1.metric("Idiomas", df['Lengua'].nunique())
         m2.metric("Total de Grupos", df['NRC'].count())
@@ -50,14 +48,12 @@ try:
             st.bar_chart(df['Lengua'].value_counts())
         with col_b:
             st.write("**Distribución por Modalidad**")
-            # Usamos bar_chart para evitar el error de versión del pie_chart
             st.bar_chart(df['MetodoInstruccion'].value_counts())
 
     with tab_buscar:
         st.subheader("Búsqueda Avanzada de Cursos")
         st.info("Utilice los filtros laterales para encontrar su NRC y Clave Banner.")
         
-        # --- Lógica de Filtros en Sidebar ---
         st.sidebar.header("Filtros de Búsqueda")
         
         idiomas = sorted(df['Lengua'].unique().tolist())
@@ -84,7 +80,6 @@ try:
                 
                 if sel_horario:
                     resultados = df_a[df_a['HoraInicio'].astype(str) == sel_horario]
-                    
                     st.dataframe(
                         resultados[['Clave Banner', 'NRC', 'Docente', 'HoraInicio', 'HoraFin', 'Status']], 
                         use_container_width=True
@@ -103,7 +98,8 @@ try:
                                 st.info(f"**Notas:** {fila['Notas'] if pd.notna(fila['Notas']) else 'Sin observaciones.'}")
 
         st.sidebar.divider()
-        if st.sidebar.button("Restablecer Filtros", on_click=restablecer_filters):
+        # CORRECCIÓN AQUÍ: Cambiado 'restablecer_filters' por 'restablecer_filtros'
+        if st.sidebar.button("Restablecer Filtros", on_click=restablecer_filtros):
             st.rerun()
 
 except Exception as e:
