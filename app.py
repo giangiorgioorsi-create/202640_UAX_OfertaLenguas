@@ -4,7 +4,7 @@ import pandas as pd
 # 1. Configuración Institucional
 st.set_page_config(page_title="Portal de Oferta Académica 2026", layout="wide")
 
-# Estilos CSS institucionales
+# Estilos CSS (Estética Anáhuac)
 st.markdown("""
     <style>
     .card { 
@@ -23,7 +23,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Gestión de Estado para el Restablecimiento (Reset) con nuevos filtros
+# 2. Gestión de Estado (Reset)
 filtros = ['idioma', 'asignatura', 'metodo', 'fechas', 'horario']
 for f in filtros:
     if f"{f}_key" not in st.session_state:
@@ -65,43 +65,46 @@ try:
         sel_idioma = st.sidebar.selectbox("1. Idioma", [""] + idiomas, key=f"id_{st.session_state.idioma_key}")
         
         if sel_idioma:
-            df_filtrado = df_full[df_full['Lengua'] == sel_idioma]
+            df_f = df_full[df_full['Lengua'] == sel_idioma]
             
             # Filtro 2: Asignatura
-            materias = sorted(df_filtrado['NombreMateria'].unique().tolist())
+            materias = sorted(df_f['NombreMateria'].unique().tolist())
             sel_materia = st.sidebar.selectbox("2. Asignatura", [""] + materias, key=f"mat_{st.session_state.asignatura_key}")
             
             if sel_materia:
-                df_filtrado = df_filtrado[df_filtrado['NombreMateria'] == sel_materia]
+                df_f = df_f[df_f['NombreMateria'] == sel_materia]
                 
-                # Filtro 3: Método Instruccional
-                metodos = sorted(df_filtrado['MetodoInstruccion'].unique().tolist())
+                # Filtro 3: Modalidad
+                metodos = sorted(df_f['MetodoInstruccion'].unique().tolist())
                 sel_metodo = st.sidebar.selectbox("3. Modalidad", [""] + metodos, key=f"met_{st.session_state.metodo_key}")
                 
                 if sel_metodo:
-                    df_filtrado = df_filtrado[df_filtrado['MetodoInstruccion'] == sel_metodo]
+                    df_f = df_f[df_f['MetodoInstruccion'] == sel_metodo]
                     
                     # Filtro 4: Fechas
-                    periodos = sorted(df_filtrado['Fechas'].unique().tolist())
+                    periodos = sorted(df_f['Fechas'].unique().tolist())
                     sel_fecha = st.sidebar.selectbox("4. Periodo / Fechas", [""] + periodos, key=f"fec_{st.session_state.fechas_key}")
                     
                     if sel_fecha:
-                        df_filtrado = df_filtrado[df_filtrado['Fechas'] == sel_fecha]
+                        df_f = df_f[df_f['Fechas'] == sel_fecha]
                         
                         # Filtro 5: Horario
-                        horarios = sorted(df_filtrado['Hora_Ref'].unique().tolist())
+                        horarios = sorted(df_f['Hora_Ref'].unique().tolist())
                         sel_horario = st.sidebar.selectbox("5. Horario", [""] + horarios, key=f"hr_{st.session_state.horario_key}")
                         
                         if sel_horario:
-                            target_cursos = df_filtrado[df_filtrado['Hora_Ref'] == sel_horario]
+                            target_cursos = df_f[df_f['Hora_Ref'] == sel_horario]
                             st.success(f"Resultados para: **{sel_materia}**")
                             
-                            for _, row in target_cursos.iterrows():
-                                # Lógica de Lista Cruzada
+                            # Evitamos duplicados en las tarjetas de resultados
+                            for idx, row in target_cursos.drop_duplicates(subset=['Docente', 'Hora_Ref', 'Fechas']).iterrows():
+                                
+                                # CORRECCIÓN: Filtramos la lista cruzada por NombreMateria para separar A de B
                                 lista_cruzada = df_full[
                                     (df_full['Docente'] == row['Docente']) & 
                                     (df_full['Hora_Ref'] == row['Hora_Ref']) & 
-                                    (df_full['Fechas'] == row['Fechas'])
+                                    (df_full['Fechas'] == row['Fechas']) &
+                                    (df_full['NombreMateria'] == row['NombreMateria'])
                                 ]
                                 
                                 es_lista_cruzada = len(lista_cruzada) > 1
@@ -114,7 +117,7 @@ try:
                                     <p style="margin: 0;"><strong>Modalidad:</strong> {row['MetodoInstruccion']} | <strong>Fechas:</strong> {row['Fechas']}</p>
                                     <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
                                     <p style="font-weight: bold; margin-bottom: 10px;">
-                                        {"Grupos vinculados en esta sesión (Lista Cruzada):" if es_lista_cruzada else "Información de inscripción:"}
+                                        {"Grupos vinculados (Lista Cruzada):" if es_lista_cruzada else "Información de inscripción:"}
                                     </p>
                                 """, unsafe_allow_html=True)
                                 
@@ -123,8 +126,6 @@ try:
                                     with cols[i % 4]:
                                         st.markdown(f"<div class='nrc-box'>NRC {item['NRC']}</div>", unsafe_allow_html=True)
                                         st.markdown(f"<span class='banner-text'>{item['ClaveBanner']}</span>", unsafe_allow_html=True)
-                                        if es_lista_cruzada:
-                                            st.caption(item['NombreMateria'])
                                 
                                 st.markdown("</div>", unsafe_allow_html=True)
                                 
@@ -137,12 +138,8 @@ try:
                                     
                                     with col_d2:
                                         dias_raw = str(row['Weekdays']) if pd.notna(row['Weekdays']) else "No especificado"
-                                        st.write(f"**Días de sesión (1-7):** `{dias_raw}`")
-                                        st.markdown("""
-                                        <div class='legend-box'>
-                                        1: Lun | 2: Mar | 3: Mié | 4: Jue | 5: Vie | 6: Sáb | 7: Dom
-                                        </div>
-                                        """, unsafe_allow_html=True)
+                                        st.write(f"**Días (1-7):** `{dias_raw}`")
+                                        st.markdown("<div class='legend-box'>1: Lun | 2: Mar | 3: Mié | 4: Jue | 5: Vie | 6: Sáb | 7: Dom</div>", unsafe_allow_html=True)
                                         
                                     st.divider()
                                     st.info(f"**Notas:** {row['Notas'] if pd.notna(row['Notas']) else 'Sin observaciones.'}")
