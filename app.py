@@ -4,7 +4,7 @@ import pandas as pd
 # 1. Configuración Institucional
 st.set_page_config(page_title="Portal de Oferta Académica 2026", layout="wide")
 
-# Estilos CSS (Estética Anáhuac)
+# Estilos CSS institucionales (Estética Anáhuac)
 st.markdown("""
     <style>
     .card { 
@@ -96,10 +96,10 @@ try:
                             target_cursos = df_f[df_f['Hora_Ref'] == sel_horario]
                             st.success(f"Resultados para: **{sel_materia}**")
                             
-                            # Evitamos duplicados en las tarjetas de resultados
-                            for idx, row in target_cursos.drop_duplicates(subset=['Docente', 'Hora_Ref', 'Fechas']).iterrows():
+                            # Eliminamos duplicados visuales para no repetir la misma tarjeta si hay varios NRC
+                            for idx, row in target_cursos.drop_duplicates(subset=['Docente', 'Hora_Ref', 'Fechas', 'NombreMateria']).iterrows():
                                 
-                                # CORRECCIÓN: Filtramos la lista cruzada por NombreMateria para separar A de B
+                                # CORRECCIÓN: Filtramos la lista cruzada también por NombreMateria para separar grupos A de B
                                 lista_cruzada = df_full[
                                     (df_full['Docente'] == row['Docente']) & 
                                     (df_full['Hora_Ref'] == row['Hora_Ref']) & 
