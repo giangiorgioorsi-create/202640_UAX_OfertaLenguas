@@ -32,7 +32,7 @@ def cargar_datos():
 
 try:
     df_full = cargar_datos()
-    st.markdown("<h1 style='color: #ff6600;'>🏛️ Auxiliar de busqueda de materias</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #ff6600;'>🏛️ Auxiliar de busqueda de materias 202640</h1>", unsafe_allow_html=True)
 
     tab_explorar, tab_buscar = st.tabs(["📊 Panorama general", "🔍 Buscador de asignaturas"])
 
