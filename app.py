@@ -121,7 +121,6 @@ def cargar_datos():
 
 
 try:
-try:
     df = cargar_datos()
     st.markdown("<h1 style='color: #FF6600 !important;'>🏛️ Centro de Lenguas UAX — Oferta Académica 202640</h1>", unsafe_allow_html=True)
 
