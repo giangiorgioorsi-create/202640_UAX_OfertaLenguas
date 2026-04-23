@@ -137,6 +137,10 @@ try:
 4. **Verifica los datos:** toma nota del NRC y de la Clave Banner.
 5. **Listas Cruzadas:** si tu curso tiene varios NRC, elige el que corresponde a tu plan de estudios.
 6. **Planifica en Banner:** agrega el curso a tu planificación a través del SIU.
+7. **Carga de materias:** del 28 de mayo al 01 de junio.
+8. **Fecha de pago para inglés primera parte:** del 03 al 05 de junio.
+9. **Fecha de pago para inglés segunda parte:** del 24 al 26 de junio.
+10. **Fecha de pago para materias a ciclo único:** del 09 al 12 de junio.
 """)
 
             with st.expander("✨ Un mensaje para tu camino"):
