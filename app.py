@@ -141,6 +141,8 @@ try:
 
             with st.expander("✨ Un mensaje para tu camino"):
                 st.info("*'Un idioma diferente es una visión diferente de la vida.'* — Federico Fellini")
+                st.write("Aprender una lengua abre puertas no solo profesionales, sino humanas. ¡Mucho éxito en tu elección!")
+
 
         with colb:
             st.markdown(f"""
