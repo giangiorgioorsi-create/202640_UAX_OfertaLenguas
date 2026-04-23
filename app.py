@@ -138,8 +138,9 @@ try:
 5. **Listas Cruzadas:** si tu curso tiene varios NRC, elige el que corresponde a tu plan de estudios.
 6. **Planifica en Banner:** agrega el curso a tu planificación a través del SIU.
             """)
-            with st.expander("✨ Un mensaje para tu camino"):
-                st.info("*'Un idioma diferente es una visión diferente de la vida.'* — Federico Fellini")
+           with st.expander("✨ Un mensaje para tu camino"):
+                 st.info("*'Un idioma diferente es una visión diferente de la vida.'* — Federico Fellini")
+                 st.write("Aprender una lengua abre puertas no solo profesionales, sino humanas. ¡Mucho éxito en tu elección!")
 
         with colb:
             st.markdown(f"""
