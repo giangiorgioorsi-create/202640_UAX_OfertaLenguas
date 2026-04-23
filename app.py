@@ -101,11 +101,11 @@ def es_valor_valido(valor):
 
 @st.cache_data(ttl=60)
 def cargar_datos():
-    archivo = "202640_UAX_OfertaLenguas.xlsx"  # ← Archivo verano
+    archivo = "202640_UAX_OfertaLenguas.xlsx"
     df = pd.read_excel(archivo, dtype=str)
     df.columns = [str(c).strip() for c in df.columns]
 
-    # Recordatorio no existe en verano — se crea vacío para que el código sea compatible
+    # Recordatorio: se crea vacío si no existe en el Excel (compatibilidad entre periodos)
     if 'Recordatorio' not in df.columns:
         df['Recordatorio'] = ""
 
@@ -120,6 +120,7 @@ def cargar_datos():
     return df
 
 
+try:
 try:
     df = cargar_datos()
     st.markdown("<h1 style='color: #FF6600 !important;'>🏛️ Centro de Lenguas UAX — Oferta Académica 202640</h1>", unsafe_allow_html=True)
@@ -189,6 +190,7 @@ try:
             if df_res.empty:
                 st.warning("No se encontraron resultados para los criterios seleccionados.")
             else:
+                # GroupKey usa ListaCruzada sólo cuando tiene valor real
                 df_res['Key'] = df_res.apply(
                     lambda r: r['ListaCruzada'] if es_valor_valido(r['ListaCruzada']) else r['NRC'],
                     axis=1
@@ -196,6 +198,7 @@ try:
 
                 for _, fila in df_res.drop_duplicates(subset=['Key']).iterrows():
 
+                    # Obtener NRCs vinculados con lógica robusta
                     if es_valor_valido(fila['ListaCruzada']):
                         lc = df[df['ListaCruzada'] == fila['ListaCruzada']]
                     else:
@@ -212,7 +215,7 @@ try:
                     </div>
                     """, unsafe_allow_html=True)
 
-                    # Recordatorio (no aparecerá en verano ya que la columna está vacía)
+                    # Recordatorio como bloque independiente (evita escape de HTML en f-string)
                     if es_valor_valido(fila['Recordatorio']):
                         st.markdown(f"""
                         <div class="reminder-box">
@@ -220,7 +223,7 @@ try:
                         </div>
                         """, unsafe_allow_html=True)
 
-                    # Detalles técnicos
+                    # Detalles técnicos (NRC y Clave Banner van dentro)
                     with st.expander("🔍 Detalles Técnicos"):
                         c_a, c_b = st.columns(2)
                         with c_a:
@@ -228,7 +231,9 @@ try:
                             st.write(f"**Periodo:** {fila['Fechas']}")
                             st.write(f"**Estatus:** {fila['Status']}")
                             st.divider()
+                            # NRC + Clave Banner en la misma línea
                             st.markdown("**NRC(s) para inscripción:**")
+                            # NRC + Clave Banner en la misma línea
                             for _, n in lc.iterrows():
                                 st.markdown(
                                     f"<div style='display:flex; align-items:center; gap:10px; margin-bottom:6px;'>"
