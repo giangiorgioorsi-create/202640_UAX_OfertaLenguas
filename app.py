@@ -134,7 +134,7 @@ try:
 1. **Abre la barra lateral:** haz clic en el botón >> en la parte superior izquierda de la aplicación, te aparecerá una barra lateral.
 2. **Filtra con cuidado:** selecciona el idioma y los demás parámetros entre las opciones propuestas.
 3. **Conoce los detalles de la oferta:** ve a la pestaña 'Resultados de búsqueda', ahí te aparecerán los cursos disponibles.
-4. **Verifica los datos:** toma nota del NRC y de la Clave Banner.
+4. **Verifica los datos:** haz clic en "Detales Técnicos" y toma nota del NRC y de la Clave Banner.
 5. **Listas Cruzadas:** si tu curso tiene varios NRC, elige el que corresponde a tu plan de estudios.
 6. **Planifica en Banner:** agrega el curso a tu planificación a través del SIU.
 7. **Carga de materias:** del 28 de mayo al 01 de junio.
