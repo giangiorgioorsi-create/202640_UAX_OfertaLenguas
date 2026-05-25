@@ -171,16 +171,19 @@ try:
     st.sidebar.divider()
 
     df_res = df.copy()
+    ha_filtrado = False  # Bandera para saber si el usuario aplicó algún criterio específico
 
     # Filtrado dinámico progresivo
     if nrc_input:
         df_res = df_res[df_res['NRC'].str.contains(nrc_input.strip(), na=False)]
+        ha_filtrado = True
     else:
         opciones_idioma = ["Todos"] + sorted(df['Lengua'].unique().tolist())
         idi = st.sidebar.selectbox("1. Idioma", opciones_idioma, key=f"i{st.session_state.rk}")
         
         if idi != "Todos":
             df_res = df_res[df_res['Lengua'] == idi]
+            ha_filtrado = True
             
             opciones_materia = ["Todas"] + sorted(df_res['NombreMateria'].unique().tolist())
             mat = st.sidebar.selectbox("2. Asignatura", opciones_materia, key=f"m{st.session_state.rk}")
@@ -210,8 +213,9 @@ try:
     if df_res.empty:
         st.warning("No se encontraron resultados para los criterios seleccionados. Intenta restablecer los filtros.")
     else:
-        # Identificar el set exacto de NRCs filtrados u obtenidos por la búsqueda para el resaltado
-        nrcs_seleccionados = set(df_res['NRC'].unique())
+        # CORRECCIÓN DE UX: Solo poblar el set de seleccionados si realmente hay un filtro activo.
+        # Si la app está en su estado inicial ("Todos"), el set queda vacío y ningún elemento se pinta de verde.
+        nrcs_seleccionados = set(df_res['NRC'].unique()) if ha_filtrado else set()
 
         # Agrupación por ListaCruzada o NRC independiente
         df_res['Key'] = df_res.apply(
@@ -243,7 +247,7 @@ try:
                 </div>
                 """, unsafe_allow_html=True)
 
-            # Contenedor de Detalles Técnicos con la lógica de coincidencia (Agosto UI)
+            # Contenedor de Detalles Técnicos con la lógica de coincidencia corregida
             with st.expander("🔍 Detalles Técnicos"):
                 c_a, c_b = st.columns(2)
                 with c_a:
@@ -256,7 +260,7 @@ try:
                     
                     # Iteración sobre los sub-registros del grupo o lista cruzada
                     for _, n in lc.iterrows():
-                        # Lógica de August: Verificar si este sub-NRC específico forma parte de la selección actual del usuario
+                        # Si el set contiene el NRC (porque hay filtros aplicados), se ilumina en verde; de lo contrario, usa el naranja estándar.
                         es_el_buscado = n['NRC'] in nrcs_seleccionados
                         tag_class = "nrc-tag-selected" if es_el_buscado else "nrc-tag"
                         label_seleccion = " <span style='color:#27ae60; font-weight:bold; font-size:0.85em;'>← Tu selección</span>" if es_el_buscado else ""
