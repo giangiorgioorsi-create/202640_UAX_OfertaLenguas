@@ -140,7 +140,7 @@ try:
 2. **Filtra progresivamente:** selecciona tu idioma. Los resultados se actualizarán abajo en tiempo real de manera dinámica.
 3. **Refina tu búsqueda:** utiliza los filtros secundarios (Asignatura, Horario, Modalidad) únicamente si requieres limitar las opciones.
 4. **Verifica los datos:** haz clic en **"Detalles Técnicos"** dentro de cada tarjeta para confirmar claves e identificar listas cruzadas.
-5. **Carga de materias:** del 28 de mayo al 01 de junio.
+5. **Carga de materias:** del 25 de mayo al 01 de junio.
 6. **Pagos Inglés:** 1ª parte (03-05 junio) | 2ª parte (24-26 junio).
 """)
             st.info("*'Un idioma diferente es una visión diferente de la vida.'* — Federico Fellini")
