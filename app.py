@@ -164,7 +164,7 @@ try:
     with t2:
         if 'rk' not in st.session_state:
             st.session_state.rk = 0
-        st.sidebar.header("Búsqueda")
+        st.sidebar.header("Barra lateral")
 
         nrc_input = st.sidebar.text_input("🔍 Buscar por NRC", key=f"nrc_{st.session_state.rk}")
         st.sidebar.divider()
