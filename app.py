@@ -132,7 +132,7 @@ try:
             st.markdown("### 📋 LEE ESTO ANTES DE EMPEZAR")
             st.markdown("""
 1. **Abre la barra lateral:** haz clic en el botón >> en la parte superior izquierda de la aplicación, te aparecerá una barra lateral.
-2. **Filtra con cuidado:** selecciona entre las opciones propuestas.
+2. **Filtra con cuidado:** selecciona el idioma y los demás parámetros entre las opciones propuestas.
 3. **Conoce los detalles de la oferta:** ve a la pestaña 'Resultados de búsqueda', ahí te aparecerán los cursos disponibles.
 4. **Verifica los datos:** toma nota del NRC y de la Clave Banner.
 5. **Listas Cruzadas:** si tu curso tiene varios NRC, elige el que corresponde a tu plan de estudios.
