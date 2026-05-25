@@ -73,6 +73,16 @@ st.markdown("""
         font-weight: bold;
         display: inline-block;
     }
+    /* Estilo para el NRC seleccionado importado del periodo de agosto */
+    .nrc-tag-selected {
+        background-color: #2ecc71 !important;
+        color: #FFFFFF !important;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        display: inline-block;
+        border: 2px solid #27ae60;
+    }
     .legend-box {
         background-color: #F1F3F5;
         padding: 10px 14px;
@@ -122,15 +132,15 @@ try:
     df = cargar_datos()
     st.markdown("<h1 style='color: #FF6600 !important;'>🏛️ Centro de Lenguas UAX — Oferta Académica 202640</h1>", unsafe_allow_html=True)
 
-    # --- NUEVA MAQUETACIÓN UX: Instrucciones fijas arriba en un Expander collapsible ---
+    # --- MAQUETACIÓN UX: Instrucciones en Expander Collapsible ---
     with st.expander("📋 LEE ESTO ANTES DE EMPEZAR — INSTRUCCIONES DE INSCRIPCIÓN", expanded=False):
         cola, colb = st.columns([2, 1])
         with cola:
             st.markdown("""
-1. **Abre la barra lateral:** haz clic en el botón **>>** en la parte superior izquierda si estás en móvil.
-2. **Filtra progresivamente:** selecciona el idioma. Los resultados se actualizarán abajo en tiempo real.
-3. **Refina tu búsqueda:** usa los filtros secundarios (Asignatura, Horario) sólo si necesitas reducir la lista.
-4. **Verifica los datos:** haz clic en **"Detalles Técnicos"** en cada tarjeta para tomar nota del NRC y la Clave Banner.
+1. **Abre la barra lateral:** haz clic en el botón **>>** en la parte superior izquierda si navegas desde un dispositivo móvil.
+2. **Filtra progresivamente:** selecciona tu idioma. Los resultados se actualizarán abajo en tiempo real de manera dinámica.
+3. **Refina tu búsqueda:** utiliza los filtros secundarios (Asignatura, Horario, Modalidad) únicamente si requieres limitar las opciones.
+4. **Verifica los datos:** haz clic en **"Detalles Técnicos"** dentro de cada tarjeta para confirmar claves e identificar listas cruzadas.
 5. **Carga de materias:** del 28 de mayo al 01 de junio.
 6. **Pagos Inglés:** 1ª parte (03-05 junio) | 2ª parte (24-26 junio).
 """)
@@ -162,36 +172,31 @@ try:
 
     df_res = df.copy()
 
-    # Lógica de filtrado inteligente
+    # Filtrado dinámico progresivo
     if nrc_input:
         df_res = df_res[df_res['NRC'].str.contains(nrc_input.strip(), na=False)]
     else:
-        # 1. Filtro de Idioma (Inicializado en "Todos" para evitar pantalla vacía)
         opciones_idioma = ["Todos"] + sorted(df['Lengua'].unique().tolist())
         idi = st.sidebar.selectbox("1. Idioma", opciones_idioma, key=f"i{st.session_state.rk}")
         
         if idi != "Todos":
             df_res = df_res[df_res['Lengua'] == idi]
             
-            # 2. Filtro de Asignatura (Basato solo su lingua selezionata)
             opciones_materia = ["Todas"] + sorted(df_res['NombreMateria'].unique().tolist())
             mat = st.sidebar.selectbox("2. Asignatura", opciones_materia, key=f"m{st.session_state.rk}")
             if mat != "Todas":
                 df_res = df_res[df_res['NombreMateria'] == mat]
                 
-                # 3. Filtro de Modalidad
                 opciones_metodo = ["Todas"] + sorted(df_res['MetodoInstruccion'].unique().tolist())
                 met = st.sidebar.selectbox("3. Modalidad", opciones_metodo, key=f"e{st.session_state.rk}")
                 if met != "Todas":
                     df_res = df_res[df_res['MetodoInstruccion'] == met]
                     
-                    # 4. Filtro de Periodo
                     opciones_fechas = ["Todos"] + sorted(df_res['Fechas'].unique().tolist())
                     fec = st.sidebar.selectbox("4. Periodo", opciones_fechas, key=f"f{st.session_state.rk}")
                     if fec != "Todos":
                         df_res = df_res[df_res['Fechas'] == fec]
                         
-                        # 5. Filtro de Horario
                         opciones_horario = ["Todos"] + sorted(df_res['Hora_Ref'].unique().tolist())
                         hor = st.sidebar.selectbox("5. Horario", opciones_horario, key=f"h{st.session_state.rk}")
                         if hor != "Todos":
@@ -205,20 +210,22 @@ try:
     if df_res.empty:
         st.warning("No se encontraron resultados para los criterios seleccionados. Intenta restablecer los filtros.")
     else:
-        # Crear Key robusta para agrupar listas cruzadas
+        # Identificar el set exacto de NRCs filtrados u obtenidos por la búsqueda para el resaltado
+        nrcs_seleccionados = set(df_res['NRC'].unique())
+
+        # Agrupación por ListaCruzada o NRC independiente
         df_res['Key'] = df_res.apply(
             lambda r: r['ListaCruzada'] if es_valor_valido(r['ListaCruzada']) else r['NRC'],
             axis=1
         )
 
         for _, fila in df_res.drop_duplicates(subset=['Key']).iterrows():
-            # Obtener sub-registros de listas cruzadas
             if es_valor_valido(fila['ListaCruzada']):
                 lc = df[df['ListaCruzada'] == fila['ListaCruzada']]
             else:
                 lc = df[df['NRC'] == fila['NRC']]
 
-            # Tarjeta de curso principal HTML
+            # Tarjeta de presentación visual del curso
             st.markdown(f"""
             <div class="course-card">
                 <h3>{fila['NombreMateria']}</h3>
@@ -229,7 +236,6 @@ try:
             </div>
             """, unsafe_allow_html=True)
 
-            # Recordatorio condicional
             if es_valor_valido(fila['Recordatorio']):
                 st.markdown(f"""
                 <div class="reminder-box">
@@ -237,25 +243,34 @@ try:
                 </div>
                 """, unsafe_allow_html=True)
 
-            # Contenedor de Detalles Técnicos
+            # Contenedor de Detalles Técnicos con la lógica de coincidencia (Agosto UI)
             with st.expander("🔍 Detalles Técnicos"):
                 c_a, c_b = st.columns(2)
                 with c_a:
-                    st.write(f"**Créditos académicos:** {fila.get('CreditosAcademicos', 'N/A')}")
+                    creditos = fila.get('CréditosAcadémicos', fila.get('CreditosAcademicos', 'N/A'))
+                    st.write(f"**Créditos académicos:** {creditos}")
                     st.write(f"**Periodo:** {fila['Fechas']}")
                     st.write(f"**Estatus:** {fila['Status']}")
                     st.divider()
                     st.markdown("**NRC(s) para inscripción:**")
                     
+                    # Iteración sobre los sub-registros del grupo o lista cruzada
                     for _, n in lc.iterrows():
-                        st.markdown(
-                            f"<div style='display:flex; align-items:center; gap:10px; margin-bottom:6px;'>"
-                            f"<div class='nrc-tag'>NRC {n['NRC']}</div>"
-                            f"<span style='color:#555; font-size:0.9em;'>Clave Banner: "
-                            f"<strong style='color:#FF6600;'>{n['ClaveBanner']}</strong></span>"
-                            f"</div>",
-                            unsafe_allow_html=True
-                        )
+                        # Lógica de August: Verificar si este sub-NRC específico forma parte de la selección actual del usuario
+                        es_el_buscado = n['NRC'] in nrcs_seleccionados
+                        tag_class = "nrc-tag-selected" if es_el_buscado else "nrc-tag"
+                        label_seleccion = " <span style='color:#27ae60; font-weight:bold; font-size:0.85em;'>← Tu selección</span>" if es_el_buscado else ""
+                        
+                        st.markdown(f"""
+                            <div style='display:flex; align-items:center; gap:10px; margin-bottom:10px;'>
+                                <div class='{tag_class}'>NRC {n['NRC']}</div>
+                                <div style='display:flex; flex-direction:column;'>
+                                    <span style='color:#555; font-size:0.9em;'>Clave Banner: <strong style='color:#FF6600;'>{n['ClaveBanner']}</strong>{label_seleccion}</span>
+                                    <span style='color:#888; font-size:0.75em; font-style:italic;'>{n['NombreMateria']}</span>
+                                </div>
+                            </div>
+                        """, unsafe_allow_html=True)
+
                 with c_b:
                     dias_raw = fila['Weekdays'] if fila['Weekdays'] else "No especificado"
                     st.markdown(f"**Días de sesión:** <span style='color:#2ecc71; font-weight:600;'>{dias_raw}</span>", unsafe_allow_html=True)
@@ -270,7 +285,7 @@ try:
                 if es_valor_valido(fila['Notas']):
                     st.info(f"📌 **Notas:** {fila['Notas']}")
 
-    # Botón Reiniciar abajo en la barra lateral
+    # Botón de reinicio en barra lateral
     st.sidebar.divider()
     if st.sidebar.button("🔄 Reiniciar Filtros", use_container_width=True):
         st.session_state.rk += 1
@@ -278,4 +293,4 @@ try:
 
 except Exception as e:
     st.error(f"Error crítico en la ejecución: {e}")
-    st.info("Asegúrate de que el archivo '202640_UAX_OfertaLenguas.xlsx' se encuentre en la raíz del repositorio.")
+    st.info("Asegúrate de que el archivo '202640_UAX_OfertaLenguas.xlsx' se encuentre en el directorio raíz de la aplicación.")
