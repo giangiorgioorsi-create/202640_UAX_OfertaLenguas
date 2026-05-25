@@ -73,7 +73,6 @@ st.markdown("""
         font-weight: bold;
         display: inline-block;
     }
-    /* Estilo para el NRC seleccionado importado del periodo de agosto */
     .nrc-tag-selected {
         background-color: #2ecc71 !important;
         color: #FFFFFF !important;
@@ -171,7 +170,7 @@ try:
     st.sidebar.divider()
 
     df_res = df.copy()
-    ha_filtrado = False  # Bandera para saber si el usuario aplicó algún criterio específico
+    ha_filtrado = False
 
     # Filtrado dinámico progresivo
     if nrc_input:
@@ -213,8 +212,11 @@ try:
     if df_res.empty:
         st.warning("No se encontraron resultados para los criterios seleccionados. Intenta restablecer los filtros.")
     else:
-        # CORRECCIÓN DE UX: Solo poblar el set de seleccionados si realmente hay un filtro activo.
-        # Si la app está en su estado inicial ("Todos"), el set queda vacío y ningún elemento se pinta de verde.
+        # 🌟 NUEVO: ORDENAMIENTO JERÁRQUICO DE UX (Evita que materias se pierdan por número de NRC reciente)
+        # Se ordena alfabéticamente por Lengua, luego por Materia (junta los Intermediate B) y al final por Horario de entrada.
+        df_res = df_res.sort_values(by=['Lengua', 'NombreMateria', 'HoraInicio'], ascending=[True, True, True])
+
+        # Control de resaltado verde
         nrcs_seleccionados = set(df_res['NRC'].unique()) if ha_filtrado else set()
 
         # Agrupación por ListaCruzada o NRC independiente
@@ -247,7 +249,7 @@ try:
                 </div>
                 """, unsafe_allow_html=True)
 
-            # Contenedor de Detalles Técnicos con la lógica de coincidencia corregida
+            # Contenedor de Detalles Técnicos
             with st.expander("🔍 Detalles Técnicos"):
                 c_a, c_b = st.columns(2)
                 with c_a:
@@ -258,9 +260,7 @@ try:
                     st.divider()
                     st.markdown("**NRC(s) para inscripción:**")
                     
-                    # Iteración sobre los sub-registros del grupo o lista cruzada
                     for _, n in lc.iterrows():
-                        # Si el set contiene el NRC (porque hay filtros aplicados), se ilumina en verde; de lo contrario, usa el naranja estándar.
                         es_el_buscado = n['NRC'] in nrcs_seleccionados
                         tag_class = "nrc-tag-selected" if es_el_buscado else "nrc-tag"
                         label_seleccion = " <span style='color:#27ae60; font-weight:bold; font-size:0.85em;'>← Tu selección</span>" if es_el_buscado else ""
