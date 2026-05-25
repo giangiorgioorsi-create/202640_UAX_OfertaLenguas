@@ -131,7 +131,7 @@ try:
         with cola:
             st.markdown("### 📋 LEE ESTO ANTES DE EMPEZAR")
             st.markdown("""
-1. **Abre la barra lateral:** haz clic en el botón en la parte superior izquierda de la aplicación, te aparecerá una barra lateral.
+1. **Abre la barra lateral:** haz clic en el botón >> << en la parte superior izquierda de la aplicación, te aparecerá una barra lateral.
 2. **Filtra con cuidado:** selecciona entre las opciones propuestas.
 3. **Conoce los detalles:** ve a la pestaña 'Buscador de Cursos', ahí te aparecerán los cursos disponibles.
 4. **Verifica los datos:** toma nota del NRC y de la Clave Banner.
