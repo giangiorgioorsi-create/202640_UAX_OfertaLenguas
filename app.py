@@ -129,7 +129,7 @@ try:
     with t1:
         cola, colb = st.columns([2, 1])
         with cola:
-            st.markdown("### 📋 Guía rápida de planificación")
+            st.markdown("### 📋 LEE ESTO ANTES DE EMPEZAR")
             st.markdown("""
 1. **Abre la barra lateral:** haz clic en el botón en la parte superior izquierda de la aplicación, te aparecerá una barra lateral.
 2. **Filtra con cuidado:** selecciona entre las opciones propuestas.
