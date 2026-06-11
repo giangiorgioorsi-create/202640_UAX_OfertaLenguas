@@ -139,9 +139,11 @@ try:
 1. **Abre la barra lateral:** haz clic en el botón **>>** en la parte superior izquierda si navegas desde un dispositivo móvil.
 2. **Filtra progresivamente:** selecciona tu idioma. Los resultados se actualizarán abajo en tiempo real de manera dinámica.
 3. **Refina tu búsqueda:** utiliza los filtros secundarios (Asignatura, Horario, Modalidad) únicamente si requieres limitar las opciones.
-4. **Verifica los datos:** haz clic en **"Detalles Técnicos"** dentro de cada tarjeta para confirmar claves e identificar listas cruzadas.
-5. **Carga de materias:** del 25 de mayo al 01 de junio.
-6. **Pagos Inglés:** 1ª parte (03-05 junio) | 2ª parte (24-26 junio).
+4. **Verifica los datos:** haz clic en **"Detalles Técnicos"** dentro de cada tarjeta para confirmar claves.
+5. **Carga de materias:** miércoles 16 y jueves 17 de junio.
+6. **Inicio de clases:** miércoles 17 de junio.
+7. **Fin de clases:** jueves 02 de julio.
+8. **Pagos:** del 24 al 26 de junio.
 """)
             st.info("*'Un idioma diferente es una visión diferente de la vida.'* — Federico Fellini")
         with colb:
